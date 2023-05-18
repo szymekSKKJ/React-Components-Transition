@@ -17,7 +17,7 @@ Something like React router but simplified and without rendering based on URL. J
 ### Initializing
 
 ```JavaScript
-  import { ComponentsTransition } from "ComponentsTransition";
+  import { ComponentsTransition } from "react-components-transition";
 
   const Component () => {
 
@@ -40,7 +40,7 @@ Something like React router but simplified and without rendering based on URL. J
 ### Switching component
 
 ```JavaScript
-  import { TransitionButton } from "ComponentsTransition";
+  import { TransitionButton } from "react-components-transitionn";
 
   const componentKey = "example2"
 
