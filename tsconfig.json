@@ -1,0 +1,14 @@
+{
+  "extends": "@tsconfig/recommended/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "preserve",
+    "declaration": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "target": "es6",
+    "module": "es6",
+    "moduleResolution": "node"
+  },
+  "include": ["src"]
+}

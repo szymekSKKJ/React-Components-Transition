@@ -1,0 +1,31 @@
+{
+  "name": "components-transition",
+  "version": "1.0.0",
+  "description": "A very small but useful React component, which allows to smart transition between components without adding unnecessary state's hooks to render conditionally",
+  "main": "index.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc && cp package.json README.md ./dist"
+  },
+  "keywords": [
+    "raect",
+    "transition",
+    "component"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szymekSKKJ/React-components-transition"
+  },
+  "author": "Szymon Stępniak s.stepniak01@gamil.com",
+  "license": "ISC",
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.2",
+    "@types/react": "^18.2.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.0.4"
+  }
+}
