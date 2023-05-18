@@ -55,4 +55,4 @@ I'm going to create any smooth transitions (animations) to work it a little bit 
 
 Probably maybe any async/await rendering?
 
-Any suggestions? Write to: **s.stepniak01@gamil.com**
+Any suggestions? Write to: **s.stepniak01@gmail.com**
