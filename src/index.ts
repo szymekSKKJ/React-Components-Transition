@@ -1,1 +1,1 @@
-export * from "./ComponentsTransition";
+export * from "./ComponentsTransition.js";
