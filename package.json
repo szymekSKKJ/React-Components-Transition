@@ -1,5 +1,5 @@
 {
-  "name": "components-transition",
+  "name": "react-components-transition",
   "version": "1.0.0",
   "description": "A very small but useful React component, which allows to smart transition between components without adding unnecessary state's hooks to render conditionally",
   "main": "index.ts",
@@ -12,6 +12,7 @@
   },
   "keywords": [
     "raect",
+    "components",
     "transition",
     "component"
   ],
