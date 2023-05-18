@@ -6,6 +6,12 @@ A very small but useful React component, which allows to smart transition betwee
 
 Something like React router but simplified and without rendering based on URL. Just more static
 
+## Instaling
+
+```npm
+  npm i react-components-transition
+```
+
 ## Usage
 
 ### Initializing
