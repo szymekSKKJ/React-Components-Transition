@@ -49,9 +49,38 @@ Something like React router but simplified and without rendering based on URL. J
   }
 ```
 
-## What's next?
+### Or with animations
 
-I'm going to create any smooth transitions (animations) to work it a little bit nicer.
+```JavaScript
+  import { TransitionButton } from "react-components-transitionn";
+
+  const componentKey = "example2"
+
+  const Example1 = () => {
+    return (
+      <TransitionButton show={componentKey} animation={{ className: "animation", duration: 500 }}> // ClassName of animation in component which shows (Exmaple2 component)
+        Show example 2 component
+      </TransitionButton>
+    );
+  };
+```
+
+In css
+
+```css
+/* CSS file of Exmaple2 component */
+
+.animation {
+  animation: animation 500ms forwards;
+  transform: scale(0);
+}
+```
+
+## Last update 2.0.0
+
+- Added smooth transitions between rerenders based on CSS class
+
+## What's next?
 
 Probably maybe any async/await rendering?
 
