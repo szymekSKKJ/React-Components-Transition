@@ -23,12 +23,20 @@ const TransitionButton = ({
 
         setChildrenCounter((visibilityCounterCurrentValue) => {
           if (animation) {
-            setChildrenObject((currentValues) => [
-              { key: show, animation: animation, isVisible: true, visibilityCounter: visibilityCounterCurrentValue + 1 },
-              ...currentValues,
-            ]);
+            setChildrenObject((currentValues) => {
+              const visibleChildren = currentValues.filter((child) => child.isVisible);
+
+              // Prohibiting set visible another child when two are visible
+
+              if (visibleChildren.length < 2) {
+                return [{ key: show, animation: animation, isVisible: true, visibilityCounter: visibilityCounterCurrentValue + 1 }, ...currentValues];
+              } else {
+                return currentValues;
+              }
+            });
           } else {
             // Allready setting last state
+
             setChildrenObject((currentValues) => {
               const childrenObject = [...currentValues];
 
@@ -59,7 +67,6 @@ const TransitionChild = ({
   children,
   childProps,
   setChildrenObject,
-  childrenObject,
 }: {
   children: ReactElement;
   childProps: childObject;
@@ -72,6 +79,8 @@ const TransitionChild = ({
     let animationTimeout: number;
 
     if (animation) {
+      const { animation } = childProps;
+
       animationTimeout = setTimeout(() => {
         setChildrenObject((currentValues) => {
           const childrenObject = [...currentValues];
@@ -84,10 +93,12 @@ const TransitionChild = ({
 
           return childrenObject;
         });
-      }, animation.duration);
+      }, animation?.duration);
     }
 
-    return () => clearTimeout(animationTimeout);
+    return () => {
+      clearTimeout(animationTimeout);
+    };
   }, []);
 
   return (
@@ -95,13 +106,14 @@ const TransitionChild = ({
       style={{ display: "inline-block" }}
       ref={(node) => {
         if (node) {
-          const { animation, visibilityCounter } = childProps;
-          const childElement = node?.firstChild as HTMLElement;
+          const { visibilityCounter, animation } = childProps;
 
-          childElement.style.zIndex = `${visibilityCounter}`;
+          const childComponent = node.firstChild as HTMLElement;
+
+          childComponent.style.zIndex = `${visibilityCounter}`;
 
           if (animation) {
-            childElement.classList.add(animation.className);
+            childComponent.classList.add(animation.className);
           }
         }
       }}>

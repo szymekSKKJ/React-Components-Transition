@@ -86,7 +86,11 @@ In css
 }
 ```
 
-## Last update 2.0.1
+## Last update 2.0.2 -> 2.0.3
+
+- Fixed bugs with rendering components when already is showing one (prohibiting rendering more then 2 components in time)
+
+## update 2.0.1
 
 - Changed render method:
   - New showed child always display before (on html page) current hiding child. (There was bug with correct positioning elements)
