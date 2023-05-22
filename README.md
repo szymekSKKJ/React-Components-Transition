@@ -1,4 +1,4 @@
-# React components transition
+# React components transition [live example!](https://react-components-transition.netlify.app/)
 
 ## Use case
 
@@ -21,13 +21,12 @@ Something like React router but simplified and without rendering based on URL. J
 
   const Component () => {
 
-    const initialVisibleComponentKey = "example1"; // Key must match the given key in component props
 
     return (
       <>
-        <ComponentsTransition visible={initialVisibleComponentKey}>
+        <ComponentsTransition>
 
-          {/* Atleast 2 components */}
+          {/* Atleast 2 components and first given is visible on first render */}
 
           <Exmaple1 key="example1"></Example>
           <Exmaple2 key="example2"></Example>
@@ -70,13 +69,30 @@ In css
 ```css
 /* CSS file of Exmaple2 component */
 
+/* Remember to give unique animation name!!! */
+
+@keyframes animation1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .animation {
-  animation: animation 500ms forwards;
   transform: scale(0);
+  animation: animation1 500ms forwards;
 }
 ```
 
-## Last update 2.0.0
+## Last update 2.0.1
+
+- Changed render method:
+  - New showed child always display before (on html page) current hiding child. (There was bug with correct positioning elements)
+  - Current showing child always is visible on the top of others (has the highest z-index)
+
+## update 2.0.0
 
 - Added smooth transitions between rerenders based on CSS class
 
