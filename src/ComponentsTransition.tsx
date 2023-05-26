@@ -129,7 +129,7 @@ const TransitionElement = ({
   );
 };
 
-const TransitionChild = ({ children }: { isStatic?: boolean; children: ReactElement }) => {
+const TransitionChild = ({ children }: { isStatic: boolean; children: ReactElement }) => {
   return children;
 };
 

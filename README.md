@@ -112,7 +112,7 @@ In css
   }
 ```
 
-## Last update 2.1.0
+## Last update 2.1.0 -> 2.1.1
 
 - Now is possible to manipulate children from outside element which is always visible
 
