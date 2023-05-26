@@ -86,17 +86,47 @@ In css
 }
 ```
 
-## Last update 2.0.2 -> 2.0.3
+### Manipulate from outside
+
+```JavaScript
+  import { ComponentsTransition, TransitionChild } from "react-components-transition";
+
+  const Component () => {
+
+
+    return (
+      <>
+        <ComponentsTransition>
+
+          // Remember to give unique key
+
+          <TransitionChild key="OutsideComponentWrapper">
+            <OutsideComponent key="OutsideComponent"></OutsideComponent>
+          </TransitionChild>
+
+          <Exmaple1 key="example1"></Example>
+          <Exmaple2 key="example2"></Example>
+        </ComponentsTransition>
+      </>
+    );
+  }
+```
+
+## Last update 2.1.0
+
+- Now is possible to manipulate children from outside element which is always visible
+
+## Update 2.0.2 -> 2.0.3
 
 - Fixed bugs with rendering components when already is showing one (prohibiting rendering more then 2 components in time)
 
-## update 2.0.1
+## Update 2.0.1
 
 - Changed render method:
   - New showed child always display before (on html page) current hiding child. (There was bug with correct positioning elements)
   - Current showing child always is visible on the top of others (has the highest z-index)
 
-## update 2.0.0
+## Update 2.0.0
 
 - Added smooth transitions between rerenders based on CSS class
 
