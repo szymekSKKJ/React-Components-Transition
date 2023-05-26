@@ -100,7 +100,35 @@ In css
 
           // Remember to give unique key
 
-          <TransitionChild key="OutsideComponentWrapper">
+          <TransitionChild isStatic={true} key="OutsideComponentWrapper">
+            <OutsideComponent key="OutsideComponent"></OutsideComponent>
+          </TransitionChild>
+
+          <Exmaple1 key="example1"></Example>
+          <Exmaple2 key="example2"></Example>
+        </ComponentsTransition>
+      </>
+    );
+  }
+```
+
+Or
+
+```JavaScript
+  import { ComponentsTransition, TransitionChild } from "react-components-transition";
+
+  const Component () => {
+    const divRef = useState(null)
+
+
+    return (
+      <>
+        <div ref={divRef}></div>
+        <ComponentsTransition>
+
+          // Remember to give unique key
+
+          <TransitionChild key="OutsideComponentWrapper" isStatic={true} renderTo={divRef}>
             <OutsideComponent key="OutsideComponent"></OutsideComponent>
           </TransitionChild>
 
