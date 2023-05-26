@@ -1,4 +1,5 @@
 import { Dispatch, ReactElement, SetStateAction, createContext, useContext, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 type childObject = { key: string; animation: { className: string; duration: number } | null; isVisible: boolean; visibilityCounter: number; isStatic: boolean };
 
@@ -129,7 +130,7 @@ const TransitionElement = ({
   );
 };
 
-const TransitionChild = ({ children }: { isStatic: boolean; children: ReactElement }) => {
+const TransitionChild = ({ children }: { isStatic: boolean; children: ReactElement; renderTo?: object }) => {
   return children;
 };
 
@@ -176,11 +177,20 @@ const ComponentsTransition = ({ children }: { children: ReactElement[] }) => {
           const childComponent = children.find((childComponent) => childComponent.key === key)!; // The given key is initialy from children
 
           if (isStatic) {
-            return (
-              <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>
-                <childComponent.type {...childComponent.props}></childComponent.type>
-              </TransitionElement>
-            );
+            if (childComponent.props.renderTo) {
+              return createPortal(
+                <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>
+                  <childComponent.type {...childComponent.props}></childComponent.type>
+                </TransitionElement>,
+                childComponent.props.renderTo.current
+              );
+            } else {
+              return (
+                <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>
+                  <childComponent.type {...childComponent.props}></childComponent.type>
+                </TransitionElement>
+              );
+            }
           } else if (isVisible) {
             return (
               <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>

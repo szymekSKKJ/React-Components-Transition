@@ -112,9 +112,10 @@ In css
   }
 ```
 
-## Last update 2.1.0 -> 2.1.1
+## Last update 2.1.0 -> 2.2.0
 
 - Now is possible to manipulate children from outside element which is always visible
+- And move out from ComponentsTransition
 
 ## Update 2.0.2 -> 2.0.3
 
