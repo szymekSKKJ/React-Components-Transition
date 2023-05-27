@@ -140,7 +140,7 @@ Or
   }
 ```
 
-## Last update 2.1.0 -> 2.2.0
+## Last update 2.1.0 -> 2.2.1
 
 - Now is possible to manipulate children from outside element which is always visible
 - And move out from ComponentsTransition

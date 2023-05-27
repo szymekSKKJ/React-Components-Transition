@@ -140,6 +140,8 @@ const ComponentsTransition = ({ children }: { children: ReactElement[] }) => {
   const [childrenObject, setChildrenObject] = useState<childObject[]>([]);
   const [childrenCounter, setChildrenCounter] = useState(1);
 
+  childrenCounter;
+
   childrenObject.sort((a, b) => a.visibilityCounter - b.visibilityCounter);
 
   useEffect(() => {
@@ -147,10 +149,10 @@ const ComponentsTransition = ({ children }: { children: ReactElement[] }) => {
 
     let isFoundFirstVisible = false;
 
-    children.map((child, index) => {
+    children.map((child) => {
       const { key, props } = child;
 
-      const visibility = props.isStatic ? true : isFoundFirstVisible === false ? true : false;
+      const visibility = props.isStatic === true ? true : isFoundFirstVisible === false ? true : false;
 
       childrenArray.push({
         key: key as string,
@@ -165,40 +167,41 @@ const ComponentsTransition = ({ children }: { children: ReactElement[] }) => {
       }
     });
 
-    return () => setChildrenObject((currentValues) => [...childrenArray, ...currentValues]);
+    setChildrenObject(() => [...childrenArray]);
   }, []);
 
   return (
     <>
       <CurrentVisibleComponentKeyContext.Provider value={{ setChildrenObject: setChildrenObject, setChildrenCounter: setChildrenCounter }}>
-        {childrenObject.map((child) => {
-          const { key, isVisible, isStatic } = child;
+        {childrenObject.length !== 0 &&
+          childrenObject.map((child) => {
+            const { key, isVisible, isStatic } = child;
 
-          const childComponent = children.find((childComponent) => childComponent.key === key)!; // The given key is initialy from children
+            const childComponent = children.find((childComponent) => childComponent.key === key)!; // The given key is initialy from children
 
-          if (isStatic) {
-            if (childComponent.props.renderTo) {
-              return createPortal(
-                <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>
-                  <childComponent.type {...childComponent.props}></childComponent.type>
-                </TransitionElement>,
-                childComponent.props.renderTo.current
-              );
-            } else {
+            if (isStatic) {
+              if (childComponent.props.renderTo) {
+                return createPortal(
+                  <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>
+                    <childComponent.type {...childComponent.props}></childComponent.type>
+                  </TransitionElement>,
+                  childComponent.props.renderTo.current
+                );
+              } else {
+                return (
+                  <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>
+                    <childComponent.type {...childComponent.props}></childComponent.type>
+                  </TransitionElement>
+                );
+              }
+            } else if (isVisible) {
               return (
                 <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>
                   <childComponent.type {...childComponent.props}></childComponent.type>
                 </TransitionElement>
               );
             }
-          } else if (isVisible) {
-            return (
-              <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>
-                <childComponent.type {...childComponent.props}></childComponent.type>
-              </TransitionElement>
-            );
-          }
-        })}
+          })}
       </CurrentVisibleComponentKeyContext.Provider>
     </>
   );
