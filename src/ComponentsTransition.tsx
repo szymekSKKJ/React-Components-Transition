@@ -1,7 +1,14 @@
-import { Dispatch, ReactElement, SetStateAction, createContext, useContext, useEffect, useState } from "react";
+import { Dispatch, ReactElement, SetStateAction, createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-type childObject = { key: string; animation: { className: string; duration: number } | null; isVisible: boolean; visibilityCounter: number; isStatic: boolean };
+type childObject = {
+  key: string;
+  animationIn: { className: string; duration: number } | null;
+  animationOut: { className: string; duration: number } | null;
+  isVisible: boolean;
+  visibilityCounter: number;
+  isStatic: boolean;
+};
 
 const CurrentVisibleComponentKeyContext = createContext<{
   setChildrenObject: Dispatch<SetStateAction<childObject[]>>;
@@ -11,9 +18,14 @@ const CurrentVisibleComponentKeyContext = createContext<{
 const TransitionButton = ({
   show,
   children,
-  animation,
+  animationIn = null,
+  animationOut = null,
   ...props
-}: { show: string; animation?: { className: string; duration: number } } & React.ComponentPropsWithoutRef<"button">) => {
+}: {
+  show: string;
+  animationIn?: { className: string; duration: number } | null;
+  animationOut?: { className: string; duration: number } | null;
+} & React.ComponentPropsWithoutRef<"button">) => {
   const { setChildrenObject, setChildrenCounter } = useContext(CurrentVisibleComponentKeyContext)!; // Not null because it is passing through context AFTER rendering this button
 
   return (
@@ -23,20 +35,51 @@ const TransitionButton = ({
         props.onClick && props.onClick(e);
 
         setChildrenCounter((visibilityCounterCurrentValue) => {
-          if (animation) {
+          if (animationIn || animationOut) {
             setChildrenObject((currentValues) => {
               const visibleChildren = currentValues.filter((child) => child.isVisible && child.isStatic === false);
               const currentChild = currentValues.find((child) => child.key === show);
 
               // If undefined it means, the current show child is this same as current visible child
-              const notCurrentVisibleChild = visibleChildren.find((child) => child.key !== show && child.isStatic === false);
+              const currentHidingChild = visibleChildren.find((child) => child.key !== show && child.isStatic === false);
 
               // Prohibiting set visible another child when two are visible
 
-              if (notCurrentVisibleChild !== undefined && visibleChildren.length < 2 && currentChild) {
+              if (currentHidingChild !== undefined && visibleChildren.length < 2 && currentChild) {
                 currentChild.isVisible = true;
-                currentChild.animation = animation;
+                currentChild.animationIn = animationIn;
                 currentChild.visibilityCounter = visibilityCounterCurrentValue + 1;
+
+                currentHidingChild.animationOut = animationOut;
+
+                // Setting last state
+
+                const longestAnimationTimeDuration = animationIn
+                  ? animationOut
+                    ? animationIn.duration > animationOut.duration
+                      ? animationIn.duration
+                      : animationOut.duration
+                    : animationIn.duration
+                  : animationOut?.duration;
+
+                setTimeout(() => {
+                  setChildrenObject((currentValues) => {
+                    const childrenObject = [...currentValues];
+
+                    childrenObject.forEach((child) => {
+                      if (child.key !== show) {
+                        child.isVisible = false;
+                        currentChild.animationIn = null;
+                        currentHidingChild.animationOut = null;
+                      } else {
+                        child.isVisible = true;
+                        child.visibilityCounter = visibilityCounterCurrentValue + 1;
+                      }
+                    });
+
+                    return childrenObject;
+                  });
+                }, longestAnimationTimeDuration);
 
                 return [...currentValues];
               } else {
@@ -72,56 +115,22 @@ const TransitionButton = ({
 
 export { TransitionButton };
 
-const TransitionElement = ({
-  children,
-  childProps,
-  setChildrenObject,
-}: {
-  children: ReactElement;
-  childProps: childObject;
-  setChildrenObject: Dispatch<SetStateAction<childObject[]>>;
-  childrenObject: childObject[];
-}) => {
-  useEffect(() => {
-    const { animation } = childProps;
-
-    let animationTimeout: number;
-
-    if (animation) {
-      const { animation } = childProps;
-
-      animationTimeout = setTimeout(() => {
-        setChildrenObject((currentValues) => {
-          const childrenObject = [...currentValues];
-
-          childrenObject.forEach((child) => {
-            if (child.key !== childProps.key) {
-              child.isVisible = false;
-            }
-          });
-
-          return childrenObject;
-        });
-      }, animation?.duration);
-    }
-
-    return () => {
-      clearTimeout(animationTimeout);
-    };
-  }, []);
-
+const TransitionElement = ({ children, childProps }: { children: ReactElement; childProps: childObject; childrenObject: childObject[] }) => {
   return (
     <div
       ref={(node) => {
         if (node) {
-          const { visibilityCounter, animation } = childProps;
+          const { visibilityCounter, animationIn, animationOut } = childProps;
 
           const childComponent = node.firstChild as HTMLElement;
 
           childComponent.style.zIndex = `${visibilityCounter}`;
 
-          if (animation) {
-            childComponent.classList.add(animation.className);
+          if (animationIn) {
+            childComponent.classList.add(animationIn.className);
+          }
+          if (animationOut) {
+            childComponent.classList.add(animationOut.className);
           }
         }
       }}>
@@ -156,7 +165,8 @@ const ComponentsTransition = ({ children }: { children: ReactElement[] }) => {
 
       childrenArray.push({
         key: key as string,
-        animation: null,
+        animationIn: null,
+        animationOut: null,
         isVisible: visibility,
         visibilityCounter: -1,
         isStatic: props.isStatic === true ? true : false,
@@ -182,21 +192,21 @@ const ComponentsTransition = ({ children }: { children: ReactElement[] }) => {
             if (isStatic) {
               if (childComponent.props.renderTo) {
                 return createPortal(
-                  <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>
+                  <TransitionElement key={key} childProps={child} childrenObject={childrenObject}>
                     <childComponent.type {...childComponent.props}></childComponent.type>
                   </TransitionElement>,
                   childComponent.props.renderTo.current
                 );
               } else {
                 return (
-                  <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>
+                  <TransitionElement key={key} childProps={child} childrenObject={childrenObject}>
                     <childComponent.type {...childComponent.props}></childComponent.type>
                   </TransitionElement>
                 );
               }
             } else if (isVisible) {
               return (
-                <TransitionElement key={key} childProps={child} setChildrenObject={setChildrenObject} childrenObject={childrenObject}>
+                <TransitionElement key={key} childProps={child} childrenObject={childrenObject}>
                   <childComponent.type {...childComponent.props}></childComponent.type>
                 </TransitionElement>
               );

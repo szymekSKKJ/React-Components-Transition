@@ -57,7 +57,10 @@ Something like React router but simplified and without rendering based on URL. J
 
   const Example1 = () => {
     return (
-      <TransitionButton show={componentKey} animation={{ className: "animation", duration: 500 }}> // ClassName of animation in component which shows (Exmaple2 component)
+      <TransitionButton show={componentKey}
+      animationIn={{ className: "animationIn", duration: 500 }}     // Animation in to new rendered child
+      animationOut={{ className: "animationOut", duration: 500 }}>  // Animation out to already rendered child
+
         Show example 2 component
       </TransitionButton>
     );
@@ -67,11 +70,31 @@ Something like React router but simplified and without rendering based on URL. J
 In css
 
 ```css
+/* CSS file of Exmaple1 component */
+
+/* Remember to give unique animation name!!! */
+
+@keyframes animationOut {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
+.animationOut {
+  transform: scale(1);
+  animation: animationOut 500ms forwards;
+}
+```
+
+```css
 /* CSS file of Exmaple2 component */
 
 /* Remember to give unique animation name!!! */
 
-@keyframes animation1 {
+@keyframes animationIn {
   0% {
     transform: scale(0);
   }
@@ -80,9 +103,9 @@ In css
   }
 }
 
-.animation {
+.animationIn {
   transform: scale(0);
-  animation: animation1 500ms forwards;
+  animation: animationIn 500ms forwards;
 }
 ```
 
@@ -92,7 +115,6 @@ In css
   import { ComponentsTransition, TransitionChild } from "react-components-transition";
 
   const Component () => {
-
 
     return (
       <>
@@ -140,7 +162,11 @@ Or
   }
 ```
 
-## Last update 2.1.0 -> 2.2.1
+## Last update 2.3.0
+
+- Changed animation. It is possbile now to give an "animationIn" and "animationOut"
+
+## Update 2.1.0 -> 2.2.1
 
 - Now is possible to manipulate children from outside element which is always visible
 - And move out from ComponentsTransition
