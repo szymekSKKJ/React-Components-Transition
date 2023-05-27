@@ -1,0 +1,26 @@
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+}
+
+.app {
+  width: auto;
+  height: auto;
+  background-color: transparent;
+}
+.app .content {
+  width: 100%;
+  height: auto;
+  background-color: transparent;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.app .content div {
+  width: 80%;
+  height: 400px;
+  flex-shrink: 0;
+  position: absolute;
+}/*# sourceMappingURL=App.css.map */

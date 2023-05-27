@@ -1,0 +1,19 @@
+.example-menu {
+  width: 100%;
+  height: auto;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 25px;
+  gap: 50px;
+}
+.example-menu button {
+  font-size: 15px;
+  padding: 8px 20px 8px 20px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.example-menu button:hover {
+  background-color: lightgray;
+}/*# sourceMappingURL=ExampleMenu.css.map */
