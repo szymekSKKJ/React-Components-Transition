@@ -10,7 +10,7 @@ const Exmaple2 = () => {
         Ut at pharetra eros, quis aliquam dui. Donec nec augue metus. Nunc eu eros purus. Fusce elit sapien, ultricies eget auctor nec, fermentum non velit.
         Donec scelerisque nisi sed posuere luctus.
       </p>
-      <TransitionButton show="Example3" animation={{ className: "animation", duration: 500 }}>
+      <TransitionButton show="Example3" animationIn={{ className: "animationIn", duration: 750 }} animationOut={{ className: "animationOut", duration: 750 }}>
         Show Example3
       </TransitionButton>
     </div>

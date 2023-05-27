@@ -7,9 +7,6 @@
   align-items: center;
   padding: 16px;
   border-radius: 6px;
-  position: absolute;
-  top: 0px;
-  left: 0px;
 
   p {
     width: 100%;
@@ -32,17 +29,30 @@
   }
 }
 
-.example-2.animation {
-  opacity: 0;
-  animation: myAnimation2 500ms forwards;
+.example-2.animationIn {
+  transform: translateY(-200%);
+  animation: myAnimation2In 750ms forwards;
 
-  @keyframes myAnimation2 {
+  @keyframes myAnimation2In {
     0% {
-      opacity: 0;
+      transform: translateY(-200%);
     }
-
     100% {
-      opacity: 1;
+      transform: translateY(0%);
+    }
+  }
+}
+
+.example-2.animationOut {
+  transform: translateY(-200%);
+  animation: myAnimation1Out 750ms forwards;
+
+  @keyframes myAnimation2Out {
+    0% {
+      transform: translateY(0%);
+    }
+    100% {
+      transform: translateY(-200%);
     }
   }
 }

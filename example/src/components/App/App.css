@@ -13,14 +13,12 @@
   width: 100%;
   height: auto;
   background-color: transparent;
-  position: relative;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
+  position: absolute;
 }
 .app .content div {
   width: 80%;
-  height: 400px;
-  flex-shrink: 0;
   position: absolute;
 }/*# sourceMappingURL=App.css.map */

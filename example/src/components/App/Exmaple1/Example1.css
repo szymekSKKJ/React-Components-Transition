@@ -7,9 +7,6 @@
   align-items: center;
   padding: 16px;
   border-radius: 6px;
-  position: absolute;
-  top: 0px;
-  left: 0px;
 }
 .example-1 p {
   width: 100%;
@@ -29,15 +26,28 @@
   margin: auto 0px 0px auto;
 }
 
-.example-1.animation {
-  opacity: 0;
-  animation: myAnimation1 500ms forwards;
+.example-1.animationIn {
+  transform: translateY(-200%);
+  animation: myAnimation1In 750ms forwards;
 }
-@keyframes myAnimation1 {
+@keyframes myAnimation1In {
   0% {
-    opacity: 0;
+    transform: translateY(-200%);
   }
   100% {
-    opacity: 1;
+    transform: translateY(0%);
+  }
+}
+
+.example-1.animationOut {
+  transform: translateY(-200%);
+  animation: myAnimation1Out 750ms forwards;
+}
+@keyframes myAnimation1Out {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-200%);
   }
 }/*# sourceMappingURL=Example1.css.map */
