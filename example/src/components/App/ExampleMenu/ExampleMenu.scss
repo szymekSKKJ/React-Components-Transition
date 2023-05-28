@@ -8,6 +8,10 @@
   padding: 25px;
   gap: 50px;
 
+  @media screen and (max-width: 768px) {
+    gap: 10px;
+  }
+
   button {
     font-size: 15px;
     padding: 8px 20px 8px 20px;
@@ -16,6 +20,11 @@
 
     &:hover {
       background-color: lightgray;
+    }
+
+    @media screen and (max-width: 768px) {
+      font-size: 12px;
+      padding: 8px;
     }
   }
 }

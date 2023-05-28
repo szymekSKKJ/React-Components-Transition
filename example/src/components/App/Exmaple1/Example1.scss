@@ -1,5 +1,5 @@
 .example-1 {
-  width: 100% !important;
+  width: 80%;
   height: 400px;
   background-color: #e6e6e6;
   display: flex;
@@ -7,6 +7,7 @@
   align-items: center;
   padding: 16px;
   border-radius: 6px;
+  position: absolute;
 
   p {
     width: 100%;
@@ -15,10 +16,19 @@
     font-weight: 600;
     margin-bottom: 25px;
 
+    @media screen and (max-width: 768px) {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
     &:nth-child(2) {
       font-size: 20px;
       font-weight: 400;
       margin-left: 25px;
+
+      @media screen and (max-width: 768px) {
+        font-size: 15px;
+      }
     }
   }
 
@@ -26,6 +36,10 @@
     font-size: 15px;
     padding: 4px 12px 4px 12px;
     margin: auto 0px 0px auto;
+
+    @media screen and (max-width: 768px) {
+      font-size: 12px;
+    }
   }
 }
 

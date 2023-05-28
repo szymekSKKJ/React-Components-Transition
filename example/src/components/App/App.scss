@@ -11,16 +11,10 @@
 
   .content {
     width: 100%;
-    height: auto;
+    height: 400px;
     background-color: transparent;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: absolute;
-
-    div {
-      width: 80%;
-      position: absolute;
-    }
   }
 }

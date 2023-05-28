@@ -8,6 +8,11 @@
   padding: 25px;
   gap: 50px;
 }
+@media screen and (max-width: 768px) {
+  .example-menu {
+    gap: 10px;
+  }
+}
 .example-menu button {
   font-size: 15px;
   padding: 8px 20px 8px 20px;
@@ -16,4 +21,10 @@
 }
 .example-menu button:hover {
   background-color: lightgray;
+}
+@media screen and (max-width: 768px) {
+  .example-menu button {
+    font-size: 12px;
+    padding: 8px;
+  }
 }/*# sourceMappingURL=ExampleMenu.css.map */
