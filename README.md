@@ -1,5 +1,7 @@
 # React components transition [live example!](https://react-components-transition.netlify.app/)
 
+> Scroll down to updates and issues
+
 ## Use case
 
 A very small but useful React component, which allows to smart transition between components without adding unnecessary state's hooks to render conditionally
@@ -162,7 +164,11 @@ Or
   }
 ```
 
-## Last update 2.3.0
+## Last update 2.4.0
+
+- Fixed issues with styling (every given child in <ComponentsTransition> was wrapped into single div element what leads to styles problems)
+
+## Update 2.3.0
 
 - Changed animation. It is possbile now to give an "animationIn" and "animationOut"
 
