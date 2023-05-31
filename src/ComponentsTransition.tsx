@@ -186,8 +186,6 @@ const ComponentsTransition = ({ children, firstVisible = null }: { children: Rea
     setChildrenObject(() => [...childrenArray]);
   }, []);
 
-  console.log(1);
-
   return (
     <ComponentsTransitionStatesContext.Provider value={{ setChildrenObject: setChildrenObject, setChildrenCounter: setChildrenCounter }}>
       {childrenObject.length !== 0 &&
