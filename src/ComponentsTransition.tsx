@@ -11,7 +11,7 @@ type childObject = {
   isStatic: boolean;
 };
 
-const CurrentVisibleComponentKeyContext = createContext<{
+const ComponentsTransitionStatesContext = createContext<{
   setChildrenObject: Dispatch<SetStateAction<childObject[]>>;
   setChildrenCounter: Dispatch<SetStateAction<number>>;
 } | null>(null);
@@ -27,31 +27,33 @@ const TransitionButton = ({
   animationIn?: { className: string; duration: number } | null;
   animationOut?: { className: string; duration: number } | null;
 } & React.ComponentPropsWithoutRef<"button">) => {
-  const contextObject = useContext(CurrentVisibleComponentKeyContext);
+  const context = useContext(ComponentsTransitionStatesContext);
 
   return (
     <button
       {...props}
       onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        if (contextObject && typeof contextObject.setChildrenObject && typeof contextObject.setChildrenCounter) {
-          const { setChildrenObject, setChildrenCounter } = contextObject;
+        const contextExist = context && typeof context.setChildrenObject && typeof context.setChildrenCounter;
+
+        if (contextExist) {
+          const { setChildrenObject, setChildrenCounter } = context;
           props.onClick && props.onClick(e);
 
           setChildrenCounter((visibilityCounterCurrentValue) => {
             if (animationIn || animationOut) {
               setChildrenObject((currentValues) => {
                 const visibleChildren = currentValues.filter((child) => child.isVisible && child.isStatic === false);
-                const currentChild = currentValues.find((child) => child.key === show);
+                const currentVisibleChild = currentValues.find((child) => child.key === show);
 
-                // If undefined it means, the current show child is this same as current visible child
+                // If undefined it means, the currentVisibleChil is this same as current visible child
                 const currentHidingChild = visibleChildren.find((child) => child.key !== show && child.isStatic === false);
 
                 // Prohibiting set visible another child when two are visible
 
-                if (currentHidingChild !== undefined && visibleChildren.length < 2 && currentChild) {
-                  currentChild.isVisible = true;
-                  currentChild.animationIn = animationIn;
-                  currentChild.visibilityCounter = visibilityCounterCurrentValue + 1;
+                if (currentHidingChild && visibleChildren.length < 2 && currentVisibleChild) {
+                  currentVisibleChild.isVisible = true;
+                  currentVisibleChild.animationIn = animationIn;
+                  currentVisibleChild.visibilityCounter = visibilityCounterCurrentValue + 1;
 
                   currentHidingChild.animationOut = animationOut;
 
@@ -72,7 +74,7 @@ const TransitionButton = ({
                       childrenObject.forEach((child) => {
                         if (child.key !== show) {
                           child.isVisible = false;
-                          currentChild.animationIn = null;
+                          currentVisibleChild.animationIn = null;
                           currentHidingChild.animationOut = null;
                         } else {
                           child.isVisible = true;
@@ -150,11 +152,9 @@ const TransitionChild = ({ children }: { isStatic: boolean; children: ReactEleme
 
 export { TransitionChild };
 
-const ComponentsTransition = ({ children }: { children: ReactElement[] }) => {
+const ComponentsTransition = ({ children, firstVisible = null }: { children: ReactElement[]; firstVisible?: string | null }) => {
   const [childrenObject, setChildrenObject] = useState<childObject[]>([]);
   const [childrenCounter, setChildrenCounter] = useState(1);
-
-  childrenCounter;
 
   childrenObject.sort((a, b) => a.visibilityCounter - b.visibilityCounter);
 
@@ -177,7 +177,11 @@ const ComponentsTransition = ({ children }: { children: ReactElement[] }) => {
         isStatic: props.isStatic === true ? true : false,
       });
 
-      if (isFoundFirstVisible === false && props.isStatic !== true) {
+      if (firstVisible !== null) {
+        if (props.isStatic !== true && isFoundFirstVisible === false && key === firstVisible) {
+          isFoundFirstVisible = true;
+        }
+      } else if (isFoundFirstVisible === false && props.isStatic !== true) {
         isFoundFirstVisible = true;
       }
     });
@@ -186,7 +190,7 @@ const ComponentsTransition = ({ children }: { children: ReactElement[] }) => {
   }, []);
 
   return (
-    <CurrentVisibleComponentKeyContext.Provider value={{ setChildrenObject: setChildrenObject, setChildrenCounter: setChildrenCounter }}>
+    <ComponentsTransitionStatesContext.Provider value={{ setChildrenObject: setChildrenObject, setChildrenCounter: setChildrenCounter }}>
       {childrenObject.length !== 0 &&
         childrenObject.map((child) => {
           const { key, isVisible, isStatic } = child;
@@ -197,26 +201,26 @@ const ComponentsTransition = ({ children }: { children: ReactElement[] }) => {
             if (childComponent.props.renderTo) {
               return createPortal(
                 <TransitionElement key={key} childProps={child} childrenObject={childrenObject}>
-                  <childComponent.type {...childComponent.props}></childComponent.type>
+                  {childComponent}
                 </TransitionElement>,
                 childComponent.props.renderTo.current
               );
             } else {
               return (
                 <TransitionElement key={key} childProps={child} childrenObject={childrenObject}>
-                  <childComponent.type {...childComponent.props}></childComponent.type>
+                  {childComponent}
                 </TransitionElement>
               );
             }
           } else if (isVisible) {
             return (
               <TransitionElement key={key} childProps={child} childrenObject={childrenObject}>
-                <childComponent.type {...childComponent.props}></childComponent.type>
+                {childComponent}
               </TransitionElement>
             );
           }
         })}
-    </CurrentVisibleComponentKeyContext.Provider>
+    </ComponentsTransitionStatesContext.Provider>
   );
 };
 

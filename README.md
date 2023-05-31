@@ -24,11 +24,13 @@ Something like React router but simplified and without rendering based on URL. J
   const Component () => {
 
 
+    const firstVisibleChildKey = "example2"
+
     return (
       <>
-        <ComponentsTransition>
+        <ComponentsTransition firstVisible={firstVisibleChildKey}>
 
-          {/* Atleast 2 components and first given is visible on first render */}
+          {/* At Least 2 components and first given is visible on first render if not specified in 'firstVisible' prop */}
 
           <Exmaple1 key="example1"></Example>
           <Exmaple2 key="example2"></Example>
@@ -144,7 +146,6 @@ Or
   const Component () => {
     const divRef = useState(null)
 
-
     return (
       <>
         <div ref={divRef}></div>
@@ -164,7 +165,11 @@ Or
   }
 ```
 
-## Last update 2.4.0
+## Last update 2.4.1
+
+- Added possibility to choose render first child
+
+## Update 2.4.0
 
 - Fixed issues with styling (every given child in <ComponentsTransition> was wrapped into single div element what leads to styles problems)
 
