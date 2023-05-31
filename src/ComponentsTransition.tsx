@@ -161,12 +161,13 @@ const ComponentsTransition = ({ children, firstVisible = null }: { children: Rea
   useEffect(() => {
     const childrenArray: childObject[] = [];
 
-    let isFoundFirstVisible = false;
+    let isFoundFisrtNotStaticVisible = false;
 
-    children.map((child) => {
+    children.map((child, index) => {
       const { key, props } = child;
 
-      const visibility = props.isStatic === true ? true : isFoundFirstVisible === false ? true : false;
+      const visibility =
+        props.isStatic === true ? true : firstVisible !== null ? (firstVisible === key ? true : false) : isFoundFisrtNotStaticVisible ? true : false;
 
       childrenArray.push({
         key: key as string,
@@ -177,17 +178,15 @@ const ComponentsTransition = ({ children, firstVisible = null }: { children: Rea
         isStatic: props.isStatic === true ? true : false,
       });
 
-      if (firstVisible !== null) {
-        if (props.isStatic !== true && isFoundFirstVisible === false && key === firstVisible) {
-          isFoundFirstVisible = true;
-        }
-      } else if (isFoundFirstVisible === false && props.isStatic !== true) {
-        isFoundFirstVisible = true;
+      if (isFoundFisrtNotStaticVisible === false && props.isStatic !== true) {
+        isFoundFisrtNotStaticVisible = true;
       }
     });
 
     setChildrenObject(() => [...childrenArray]);
   }, []);
+
+  console.log(1);
 
   return (
     <ComponentsTransitionStatesContext.Provider value={{ setChildrenObject: setChildrenObject, setChildrenCounter: setChildrenCounter }}>

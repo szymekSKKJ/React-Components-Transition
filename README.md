@@ -165,7 +165,7 @@ Or
   }
 ```
 
-## Last update 2.4.1
+## Last update 2.4.1 -> 2.4.2
 
 - Added possibility to choose render first child
 
