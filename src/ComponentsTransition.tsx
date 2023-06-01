@@ -163,11 +163,11 @@ const ComponentsTransition = ({ children, firstVisible = null }: { children: Rea
 
     let isFoundFisrtNotStaticVisible = false;
 
-    children.map((child, index) => {
+    children.map((child) => {
       const { key, props } = child;
 
       const visibility =
-        props.isStatic === true ? true : firstVisible !== null ? (firstVisible === key ? true : false) : isFoundFisrtNotStaticVisible ? true : false;
+        props.isStatic === true ? true : firstVisible !== null ? (firstVisible === key ? true : false) : isFoundFisrtNotStaticVisible ? false : true;
 
       childrenArray.push({
         key: key as string,
