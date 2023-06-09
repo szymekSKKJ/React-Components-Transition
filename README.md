@@ -8,6 +8,11 @@ A very small but useful React component, which allows to smart transition betwee
 
 Something like React router but simplified and without rendering based on URL. Just more static
 
+<p align="center">
+  <img src="https://github.com/szymekSKKJ/React-components-transition/blob/master/Example.gif">
+</p>
+
+
 ## Instaling
 
 ```npm
