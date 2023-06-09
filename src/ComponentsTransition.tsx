@@ -131,7 +131,7 @@ const TransitionElement = ({ children, childProps }: { children: ReactElement; c
 
     const childComponentDomElement = document.querySelector(`.${parsedHTMLChildComponent.className}`) as HTMLElement;
 
-    const { visibilityCounter, animationIn, animationOut } = childProps;
+    const { visibilityCounter, animationIn, animationOut, isStatic } = childProps;
 
     if (animationIn) {
       childComponentDomElement.classList.add(animationIn.className);
@@ -140,7 +140,9 @@ const TransitionElement = ({ children, childProps }: { children: ReactElement; c
       childComponentDomElement.classList.add(animationOut.className);
     }
 
-    childComponentDomElement.style.zIndex = `${visibilityCounter}`;
+    if (isStatic === false) {
+      childComponentDomElement.style.zIndex = `${visibilityCounter}`;
+    }
   });
 
   return children;
