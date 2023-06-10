@@ -12,7 +12,6 @@ Something like React router but simplified and without rendering based on URL. J
   <img src="https://github.com/szymekSKKJ/React-components-transition/blob/master/Example.gif">
 </p>
 
-
 ## Instaling
 
 ```npm
@@ -170,7 +169,7 @@ Or
   }
 ```
 
-## Last update 2.4.1 -> 2.4.6
+## Last update 2.4.1 -> 2.4.7
 
 - Added possibility to choose render first child
 

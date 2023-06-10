@@ -123,25 +123,30 @@ export { TransitionButton };
 
 const TransitionElement = ({ children, childProps }: { children: ReactElement; childProps: childObject; childrenObject: childObject[] }) => {
   useEffect(() => {
-    // This is not the best idea but allows to render with animations witchout div element wrapper, which leads to styles problems
-
-    const parsedHTMLChild = new DOMParser().parseFromString(ReactDomServer.renderToStaticMarkup(children), "text/xml");
-
-    const parsedHTMLChildComponent = parsedHTMLChild.firstChild as HTMLElement;
-
-    const childComponentDomElement = document.querySelector(`.${parsedHTMLChildComponent.className}`) as HTMLElement;
-
-    const { visibilityCounter, animationIn, animationOut, isStatic } = childProps;
-
-    if (animationIn) {
-      childComponentDomElement.classList.add(animationIn.className);
-    }
-    if (animationOut) {
-      childComponentDomElement.classList.add(animationOut.className);
-    }
+    // This is not the best idea but allows to render with animations without div element wrapper, which leads to styles problems
+    const { visibilityCounter, animationIn, animationOut, isStatic, key } = childProps;
 
     if (isStatic === false) {
-      childComponentDomElement.style.zIndex = `${visibilityCounter}`;
+      const parsedHTMLChild = new DOMParser().parseFromString(ReactDomServer.renderToStaticMarkup(children), "text/xml");
+
+      const parsedHTMLChildComponent = parsedHTMLChild.firstChild as HTMLElement;
+
+      try {
+        const childComponentDomElement = document.querySelector(`.${parsedHTMLChildComponent.className}`) as HTMLElement;
+
+        if (childComponentDomElement) {
+          if (animationIn) {
+            childComponentDomElement.classList.add(animationIn.className);
+          }
+          if (animationOut) {
+            childComponentDomElement.classList.add(animationOut.className);
+          }
+
+          childComponentDomElement.style.zIndex = `${visibilityCounter}`;
+        }
+      } catch {
+        console.error(`Child with given key '${key}' has not parent with className`);
+      }
     }
   });
 
