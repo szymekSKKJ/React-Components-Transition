@@ -25,7 +25,7 @@ type TransitionChildType = {
   animationOut: { className: string; duration: number } | null;
   parentElementClassName: undefined | string;
   isHiding: boolean;
-  renderTo: object;
+  renderToRef: object;
 };
 
 const TransitionButton = ({
@@ -133,7 +133,7 @@ const TransitionChild = ({
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const TransitionChildStatic = ({ children, renderTo }: { children: ReactElement; renderTo: object }) => {
+const TransitionChildStatic = ({ children, renderToRef }: { children: ReactElement; renderToRef: object }) => {
   return children;
 };
 
@@ -176,7 +176,7 @@ const ComponentsTransition = ({
             animationOut: null,
             parentElementClassName: parentElementRef.current?.className,
             isHiding: false,
-            renderTo: props.renderTo ? props.renderTo : false,
+            renderToRef: props.renderToRef ? props.renderToRef : false,
           });
         } else {
           throw {};
@@ -197,7 +197,7 @@ const ComponentsTransition = ({
 
     if (childrenTransition.length !== 0) {
       childrenTransition.forEach((childData) => {
-        const { isVisible, key, className, animationIn, animationOut, isHiding, renderTo } = childData;
+        const { isVisible, key, className, animationIn, animationOut, isHiding, renderToRef } = childData;
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
@@ -212,7 +212,7 @@ const ComponentsTransition = ({
           animationOut: animationOut,
           parentElementClassName: parentElementRef.current?.className,
           isHiding: isHiding,
-          renderTo: renderTo,
+          renderToRef: renderToRef,
         });
       });
 
@@ -224,14 +224,14 @@ const ComponentsTransition = ({
     <ComponentsTransitionContext.Provider value={setChildrenTransition}>
       {childrenTransition.length !== 0 &&
         childrenTransition.map((childData) => {
-          const { child, isVisible, key, isHiding, renderTo } = childData;
+          const { child, isVisible, key, isHiding, renderToRef } = childData;
 
           const clonedElement = cloneElement(child as ReactElement);
 
-          if (renderTo) {
+          if (renderToRef) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
-            return createPortal(child, renderTo.current);
+            return createPortal(child, renderToRef.current);
           } else if (isVisible || isHiding) {
             return (
               <TransitionChild key={key} childData={childData} zIndexCounter={zIndexCounter} setZIndexcounter={setZIndexcounter}>

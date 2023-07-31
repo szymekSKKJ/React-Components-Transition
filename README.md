@@ -181,7 +181,7 @@ Or
   }
 ```
 
-## Last update 3.0.0
+## Last update 3.0.0 - > 3.0.5
 
 - Changed main behavior
 
