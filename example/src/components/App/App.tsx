@@ -1,4 +1,4 @@
-import { ComponentsTransition, TransitionChild } from "react-components-transition";
+import ComponentsTransition, { TransitionChildStatic } from "react-components-transition/ComponentsTransition";
 import "./App.css";
 import Exmaple1 from "./Exmaple1/Example1";
 import Exmaple2 from "./Exmaple2/Example2";
@@ -9,15 +9,16 @@ import { useRef } from "react";
 
 const App = () => {
   const exampleMenuRef = useRef(null);
+  const contentRef = useRef(null);
 
   return (
     <div className="app">
       <div className="example-menu" ref={exampleMenuRef}></div>
-      <div className="content">
-        <ComponentsTransition>
-          <TransitionChild key="ExampleMenuWrapper" isStatic={true} renderTo={exampleMenuRef}>
+      <div className="content" ref={contentRef}>
+        <ComponentsTransition parentElementRef={contentRef}>
+          <TransitionChildStatic renderToRef={exampleMenuRef}>
             <ExampleMenu key="ExampleMenu"></ExampleMenu>
-          </TransitionChild>
+          </TransitionChildStatic>
 
           <Exmaple1 key="Example1"></Exmaple1>
           <Exmaple2 key="Example2"></Exmaple2>

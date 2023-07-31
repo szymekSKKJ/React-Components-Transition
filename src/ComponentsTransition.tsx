@@ -25,7 +25,7 @@ type TransitionChildType = {
   animationOut: { className: string; duration: number } | null;
   parentElementClassName: undefined | string;
   isHiding: boolean;
-  renderToRef: object;
+  renderTo: object;
 };
 
 const TransitionButton = ({
@@ -104,7 +104,7 @@ const TransitionChild = ({
   zIndexCounter,
   setZIndexcounter,
 }: {
-  children: ReactNode;
+  children: ReactElement;
   childData: TransitionChildType;
   zIndexCounter: number;
   setZIndexcounter: Dispatch<SetStateAction<number>>;
@@ -129,11 +129,11 @@ const TransitionChild = ({
     setZIndexcounter((currentValue) => currentValue + 1);
   }, []);
 
-  return children as ReactElement;
+  return children;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const TransitionChildStatic = ({ children, renderToRef }: { children: ReactNode; renderToRef: object }) => {
+const TransitionChildStatic = ({ children, renderTo }: { children: ReactElement; renderTo: object }) => {
   return children;
 };
 
@@ -176,7 +176,7 @@ const ComponentsTransition = ({
             animationOut: null,
             parentElementClassName: parentElementRef.current?.className,
             isHiding: false,
-            renderToRef: props.renderTo ? props.renderTo : false,
+            renderTo: props.renderTo ? props.renderTo : false,
           });
         } else {
           throw {};
@@ -197,7 +197,7 @@ const ComponentsTransition = ({
 
     if (childrenTransition.length !== 0) {
       childrenTransition.forEach((childData) => {
-        const { isVisible, key, className, animationIn, animationOut, isHiding, renderToRef } = childData;
+        const { isVisible, key, className, animationIn, animationOut, isHiding, renderTo } = childData;
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
@@ -212,7 +212,7 @@ const ComponentsTransition = ({
           animationOut: animationOut,
           parentElementClassName: parentElementRef.current?.className,
           isHiding: isHiding,
-          renderToRef: renderToRef,
+          renderTo: renderTo,
         });
       });
 
@@ -224,14 +224,14 @@ const ComponentsTransition = ({
     <ComponentsTransitionContext.Provider value={setChildrenTransition}>
       {childrenTransition.length !== 0 &&
         childrenTransition.map((childData) => {
-          const { child, isVisible, key, isHiding, renderToRef } = childData;
+          const { child, isVisible, key, isHiding, renderTo } = childData;
 
           const clonedElement = cloneElement(child as ReactElement);
 
-          if (renderToRef) {
+          if (renderTo) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
-            return createPortal(child, renderToRef.current);
+            return createPortal(child, renderTo.current);
           } else if (isVisible || isHiding) {
             return (
               <TransitionChild key={key} childData={childData} zIndexCounter={zIndexCounter} setZIndexcounter={setZIndexcounter}>
