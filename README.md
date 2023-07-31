@@ -27,19 +27,23 @@ Something like React router but simplified and without rendering based on URL. J
 
   const Component () => {
 
+    const parentElementRef = useRef(null)
 
     const firstVisibleChildKey = "example2"
 
     return (
-      <>
-        <ComponentsTransition firstVisible={firstVisibleChildKey}>
+
+      // Ref must be specified
+
+      <div className="parent" ref={parentElementRef}>
+        <ComponentsTransition parentElementRef={parentElementRef} firstVisible={firstVisibleChildKey}>
 
           {/* At Least 2 components and first given is visible on first render if not specified in 'firstVisible' prop */}
 
           <Exmaple1 key="example1"></Example>
           <Exmaple2 key="example2"></Example>
         </ComponentsTransition>
-      </>
+      </div>
     );
   }
 ```
@@ -120,24 +124,30 @@ In css
 ### Manipulate from outside
 
 ```JavaScript
-  import { ComponentsTransition, TransitionChild } from "react-components-transition";
+  import { ComponentsTransition, TransitionChildStatic } from "react-components-transition";
 
   const Component () => {
 
+    const parentElementRef = useRef(null)
+    const divRef = useState(null)
+
+
     return (
-      <>
+      <div className="parent" ref={parentElementRef}>
         <ComponentsTransition>
 
           // Remember to give unique key
 
-          <TransitionChild isStatic={true} key="OutsideComponentWrapper">
+          // Ref must be specified
+
+          <TransitionChildStatic renderToRef={divRef} key="OutsideComponentWrapper">
             <OutsideComponent key="OutsideComponent"></OutsideComponent>
-          </TransitionChild>
+          </TransitionChildStatic>
 
           <Exmaple1 key="example1"></Example>
           <Exmaple2 key="example2"></Example>
         </ComponentsTransition>
-      </>
+      </div>
     );
   }
 ```
@@ -148,28 +158,41 @@ Or
   import { ComponentsTransition, TransitionChild } from "react-components-transition";
 
   const Component () => {
+
+    const parentElementRef = useRef(null)
     const divRef = useState(null)
 
     return (
-      <>
+      <div className="parent" ref={parentElementRef}>
         <div ref={divRef}></div>
         <ComponentsTransition>
 
           // Remember to give unique key
 
-          <TransitionChild key="OutsideComponentWrapper" isStatic={true} renderTo={divRef}>
+          <TransitionChildStatic key="OutsideComponentWrapper" renderToRef={divRef}>
             <OutsideComponent key="OutsideComponent"></OutsideComponent>
-          </TransitionChild>
+          </TransitionChildStatic>
 
           <Exmaple1 key="example1"></Example>
           <Exmaple2 key="example2"></Example>
         </ComponentsTransition>
-      </>
+      </div>
     );
   }
 ```
 
-## Last update 2.4.1 -> 2.4.7
+## Last update 3.0.0
+
+- Changed main behavior
+
+  - Parent ref must be specified in <ComponentsTransition>
+  - <TransitionChild> has been change to <TransitionChildStatic> and renderToRef prop must be specified
+
+- Bug fixes
+  - Children could not update content when any property has been changed
+  - No limitations while children are animated (it was not possible to render more then 2 children)
+
+## Update 2.4.1 -> 2.4.7
 
 - Added possibility to choose render first child
 
