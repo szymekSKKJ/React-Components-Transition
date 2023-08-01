@@ -124,37 +124,6 @@ In css
 ### Manipulate from outside
 
 ```JavaScript
-  import { ComponentsTransition, TransitionChildStatic } from "react-components-transition";
-
-  const Component () => {
-
-    const parentElementRef = useRef(null)
-    const divRef = useState(null)
-
-
-    return (
-      <div className="parent" ref={parentElementRef}>
-        <ComponentsTransition>
-
-          // Remember to give unique key
-
-          // Ref must be specified
-
-          <TransitionChildStatic renderToRef={divRef} key="OutsideComponentWrapper">
-            <OutsideComponent key="OutsideComponent"></OutsideComponent>
-          </TransitionChildStatic>
-
-          <Exmaple1 key="example1"></Example>
-          <Exmaple2 key="example2"></Example>
-        </ComponentsTransition>
-      </div>
-    );
-  }
-```
-
-Or
-
-```JavaScript
   import { ComponentsTransition, TransitionChild } from "react-components-transition";
 
   const Component () => {
