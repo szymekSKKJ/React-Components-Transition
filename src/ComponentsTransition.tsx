@@ -14,12 +14,11 @@ import {
 import { createPortal } from "react-dom";
 import ReactDomServer from "react-dom/server";
 
-const ComponentsTransitionContext = createContext<Dispatch<SetStateAction<TransitionChildType[]>>>((value) => value);
+const ComponentsTransitionContext = createContext<Dispatch<SetStateAction<transitionChildType[]>>>((value) => value);
 
-type TransitionChildType = {
+type transitionChildType = {
   key: string;
   isVisible: boolean;
-  child: ReactNode;
   className: string;
   animationIn: { className: string; duration: number } | null;
   animationOut: { className: string; duration: number } | null;
@@ -33,12 +32,14 @@ const TransitionButton = ({
   show,
   animationIn = null,
   animationOut = null,
+  onClick,
   ...props
 }: {
-  children: ReactNode;
+  children?: ReactNode;
   show: string;
   animationIn?: { className: string; duration: number } | null;
   animationOut?: { className: string; duration: number } | null;
+  onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined;
 } & React.ComponentPropsWithoutRef<"button">) => {
   const setChildrenTransition = useContext(ComponentsTransitionContext);
   const timeoutRef = useRef<null | number>(null);
@@ -52,7 +53,7 @@ const TransitionButton = ({
   return (
     <button
       {...props}
-      onClick={() => {
+      onClick={(event) => {
         setChildrenTransition((currentValues) => {
           const copiedCurrentValues = [...currentValues];
 
@@ -90,6 +91,7 @@ const TransitionButton = ({
 
           return copiedCurrentValues;
         });
+        onClick && onClick(event);
       }}>
       {children}
     </button>
@@ -105,7 +107,7 @@ const TransitionChild = ({
   setZIndexcounter,
 }: {
   children: ReactElement;
-  childData: TransitionChildType;
+  childData: transitionChildType;
   zIndexCounter: number;
   setZIndexcounter: Dispatch<SetStateAction<number>>;
 }) => {
@@ -120,14 +122,20 @@ const TransitionChild = ({
       if (childElement && childData.animationIn && !childElement.className.includes(childData.animationIn.className)) {
         childElement.classList.add(childData.animationIn.className);
       }
-
-      if (childElement && childData.animationOut && childData.isHiding && !childElement.className.includes(childData.animationOut.className)) {
-        childElement.classList.add(childData.animationOut.className);
-      }
     }
 
     setZIndexcounter((currentValue) => currentValue + 1);
   }, []);
+
+  useEffect(() => {
+    const parentElement = document.querySelector(`.${childData.parentElementClassName}`);
+
+    const childElement = parentElement?.querySelector(`.${childData.className}`) as HTMLElement;
+
+    if (childElement && childData.animationOut && childData.isHiding && !childElement.className.includes(childData.animationOut.className)) {
+      childElement.classList.add(childData.animationOut.className);
+    }
+  }, [childData.isHiding]);
 
   return children;
 };
@@ -148,14 +156,32 @@ const ComponentsTransition = ({
   firstVisible?: null | string;
   parentElementRef: { current: HTMLElement | null };
 }) => {
-  const [childrenTransition, setChildrenTransition] = useState<TransitionChildType[]>([]);
+  const [childrenTransition, setChildrenTransition] = useState<transitionChildType[]>([]);
   const [zIndexCounter, setZIndexcounter] = useState(1);
 
   useLayoutEffect(() => {
-    const childrenTransition: TransitionChildType[] = [];
+    setChildrenTransition((currentValues) => {
+      const copiedCurrentValues = [...currentValues];
+
+      copiedCurrentValues.forEach((childTransition) => {
+        if (childTransition.key === firstVisible) {
+          childTransition.isVisible = true;
+        } else {
+          childTransition.isVisible = false;
+        }
+      });
+
+      return copiedCurrentValues;
+    });
+  }, [firstVisible]);
+
+  useLayoutEffect(() => {
+    const childrenTransition: transitionChildType[] = [];
 
     try {
-      children.forEach((child, index) => {
+      let isFirstVisibleChildFound = false;
+
+      children.forEach((child) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         const { key, props } = child;
@@ -165,12 +191,20 @@ const ComponentsTransition = ({
         if (parsedHTMLChild.firstChild && parsedHTMLChild.firstChild.nodeName !== "html") {
           const wrappedChildElement = parsedHTMLChild.firstChild as HTMLDivElement;
 
-          const isVisibleStatus = firstVisible && firstVisible === key ? true : firstVisible ? false : index == 0 ? true : false;
+          const isVisibleStatus =
+            props.renderToRef !== undefined
+              ? true
+              : firstVisible === key
+              ? true
+              : firstVisible === null
+              ? props.renderToRef === undefined && isFirstVisibleChildFound === false
+                ? true
+                : false
+              : false;
 
           childrenTransition.push({
             key: key,
             isVisible: isVisibleStatus,
-            child: child,
             className: wrappedChildElement.className,
             animationIn: null,
             animationOut: null,
@@ -178,6 +212,10 @@ const ComponentsTransition = ({
             isHiding: false,
             renderToRef: props.renderToRef ? props.renderToRef : false,
           });
+
+          if (props.renderToRef === undefined && isFirstVisibleChildFound === false) {
+            isFirstVisibleChildFound = true;
+          }
         } else {
           throw {};
         }
@@ -193,20 +231,15 @@ const ComponentsTransition = ({
   }, []);
 
   useLayoutEffect(() => {
-    const childrenTransitionAfter: TransitionChildType[] = [];
+    const childrenTransitionAfter: transitionChildType[] = [];
 
     if (childrenTransition.length !== 0) {
       childrenTransition.forEach((childData) => {
         const { isVisible, key, className, animationIn, animationOut, isHiding, renderToRef } = childData;
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        const foundChild = children.find((child) => child.key === key);
-
         childrenTransitionAfter.push({
           key: key,
           isVisible: isVisible,
-          child: foundChild,
           className: className,
           animationIn: animationIn,
           animationOut: animationOut,
@@ -224,14 +257,18 @@ const ComponentsTransition = ({
     <ComponentsTransitionContext.Provider value={setChildrenTransition}>
       {childrenTransition.length !== 0 &&
         childrenTransition.map((childData) => {
-          const { child, isVisible, key, isHiding, renderToRef } = childData;
+          const { isVisible, key, isHiding, renderToRef } = childData;
 
-          const clonedElement = cloneElement(child as ReactElement);
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
+          const foundChild = children.find((child) => child.key === key);
+
+          const clonedElement = cloneElement(foundChild as ReactElement);
 
           if (renderToRef) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
-            return createPortal(child, renderToRef.current);
+            return createPortal(foundChild, renderToRef.current);
           } else if (isVisible || isHiding) {
             return (
               <TransitionChild key={key} childData={childData} zIndexCounter={zIndexCounter} setZIndexcounter={setZIndexcounter}>

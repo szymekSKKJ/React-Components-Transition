@@ -1,6 +1,6 @@
 {
   "name": "react-components-transition",
-  "version": "3.0.5",
+  "version": "3.0.11",
   "description": "A very small but useful React component, which allows to smart transition between components without adding unnecessary state's hooks to render conditionally",
   "main": "index.js",
   "type": "module",
