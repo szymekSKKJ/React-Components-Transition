@@ -192,6 +192,10 @@ In css
 
 - Added smooth transitions between rerenders based on CSS class
 
+## Update Issues
+
+- Conditional rendering may cause errors. Remember to always return an element (React.Fragment also provides an error)
+
 ## What's next?
 
 Probably maybe any async/await rendering?
