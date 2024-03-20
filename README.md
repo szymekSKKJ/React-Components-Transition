@@ -127,7 +127,7 @@ In css
             <Exmaple2 key="example2"></Example>
           </ComponentsTransition>
           <TransitionButton
-            context={context}  // Add the cotext
+            context={context}  // Add the context
             show={"example2"}
             animationIn={{ className: "animationIn", duration: 500 }}
             animationOut={{ className: "animationOut", duration: 500 }}>
