@@ -1,97 +1,140 @@
-import {
-  Dispatch,
-  ReactElement,
-  ReactNode,
-  SetStateAction,
-  cloneElement,
-  createContext,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
-import { createPortal } from "react-dom";
-import ReactDomServer from "react-dom/server";
+import { ButtonHTMLAttributes, Dispatch, ReactNode, SetStateAction, cloneElement, createContext, useContext, useEffect, useState } from "react";
 
-const ComponentsTransitionContext = createContext<Dispatch<SetStateAction<transitionChildType[]>>>((value) => value);
+const ComponentsTransitionSetChildrenContext = createContext<React.Dispatch<React.SetStateAction<componentsTransitionChildren>> | null>(null);
 
-type transitionChildType = {
-  key: string;
+type componentsTransitionChildren = {
+  id: `${string}-${string}-${string}-${string}-${string}`;
   isVisible: boolean;
-  className: string;
-  animationIn: { className: string; duration: number } | null;
-  animationOut: { className: string; duration: number } | null;
-  parentElementClassName: undefined | string;
-  isHiding: boolean;
-  renderToRef: object;
-};
+  key: string;
+  domElement: null | HTMLElement;
+  unmountTimeoutRef: null | ReturnType<typeof setTimeout>;
+}[];
 
-const TransitionButton = ({
-  children,
-  show,
-  animationIn = null,
-  animationOut = null,
-  onClick,
-  ...props
-}: {
-  children?: ReactNode;
+interface TransitionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
   show: string;
-  animationIn?: { className: string; duration: number } | null;
-  animationOut?: { className: string; duration: number } | null;
-  onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined;
-} & React.ComponentPropsWithoutRef<"button">) => {
-  const setChildrenTransition = useContext(ComponentsTransitionContext);
-  const timeoutRef = useRef<null | number>(null);
+  animationIn?: { className: string; duration: number };
+  animationOut?: { className: string; duration: number };
+  context?: null | Dispatch<SetStateAction<componentsTransitionChildren>>;
+}
+
+const TransitionButton = ({ children, show, animationIn, animationOut, context, onClick, ...rest }: TransitionButtonProps) => {
+  const setChildrenFromContext = useContext(ComponentsTransitionSetChildrenContext);
+
+  const setChildren = context ? context : setChildrenFromContext;
+  const [isClicked, setIsClicked] = useState(false);
 
   useEffect(() => {
-    return () => {
-      timeoutRef.current && clearTimeout(timeoutRef.current);
-    };
-  }, []);
+    isClicked &&
+      setChildren &&
+      setChildren((currentValue) => {
+        const copiedCurrentValue = [...currentValue];
+
+        copiedCurrentValue.forEach((data) => {
+          const { isVisible, key } = data;
+
+          if (isVisible && key !== show && animationOut === undefined && animationIn === undefined) {
+            data.isVisible = false;
+          }
+          if (key === show) {
+            data.isVisible = true;
+          }
+        });
+
+        const foundChildToGiveAnimationIn = copiedCurrentValue.find((data) => data.key === show);
+
+        if (foundChildToGiveAnimationIn) {
+          const { domElement, unmountTimeoutRef } = foundChildToGiveAnimationIn;
+
+          setTimeout(() => {
+            setChildren((currentValue) => {
+              const copiedCurrentValue = [...currentValue];
+
+              const foundChildToGiveAnimationInLocal = copiedCurrentValue.find((data) => data.key === foundChildToGiveAnimationIn.key);
+
+              if (foundChildToGiveAnimationInLocal) {
+                const { domElement } = foundChildToGiveAnimationInLocal;
+
+                if (domElement && animationIn) {
+                  domElement.classList.add(animationIn.className);
+                }
+              }
+
+              return copiedCurrentValue;
+            });
+          });
+
+          if (domElement && animationOut) {
+            domElement.classList.remove(animationOut.className);
+          }
+
+          if (unmountTimeoutRef) {
+            foundChildToGiveAnimationIn.unmountTimeoutRef = null;
+            clearTimeout(unmountTimeoutRef);
+          }
+        }
+
+        const foundChildrenToGiveAnimationOut = copiedCurrentValue.filter((data) => data.isVisible && data.key !== show);
+
+        foundChildrenToGiveAnimationOut.forEach((foundChildToGiveAnimationOut) => {
+          const { id } = foundChildToGiveAnimationOut;
+
+          if (animationOut) {
+            setTimeout(() => {
+              setChildren((currentValue) => {
+                const copiedCurrentValue = [...currentValue];
+
+                const foundChildToGiveAnimationOutLocal = copiedCurrentValue.find((data) => data.key === foundChildToGiveAnimationOut.key);
+
+                if (foundChildToGiveAnimationOutLocal) {
+                  const { domElement } = foundChildToGiveAnimationOutLocal;
+
+                  if (domElement && animationIn) {
+                    domElement.classList.add(animationOut.className);
+                  }
+                }
+
+                return copiedCurrentValue;
+              });
+            });
+
+            if (foundChildToGiveAnimationOut.unmountTimeoutRef === null) {
+              foundChildToGiveAnimationOut.unmountTimeoutRef = setTimeout(() => {
+                setChildren((currentValue) => {
+                  const copiedCurrentValue = [...currentValue];
+
+                  const childToUnmount = copiedCurrentValue.find((data) => data.id === id)!;
+
+                  childToUnmount.isVisible = false;
+                  childToUnmount.domElement = null;
+
+                  return copiedCurrentValue;
+                });
+              }, animationOut.duration);
+            }
+          }
+        });
+
+        return copiedCurrentValue;
+      });
+
+    setIsClicked(false);
+  }, [isClicked, setChildren, show]);
 
   return (
     <button
-      {...props}
+      {...rest}
       onClick={(event) => {
-        setChildrenTransition((currentValues) => {
-          const copiedCurrentValues = [...currentValues];
-
-          const foundChildrenTransition = copiedCurrentValues.find((childrenTransition) => childrenTransition.key === show)!;
-
-          const currentVisibleChild = copiedCurrentValues.find(
-            (childrenTransition) => childrenTransition.isVisible === true && childrenTransition.key !== show && childrenTransition.isHiding === false
-          )!;
-
-          if (currentVisibleChild) {
-            if (animationOut !== null) {
-              currentVisibleChild.isHiding = true;
-              currentVisibleChild.animationOut = animationOut;
-
-              const timeout = setTimeout(() => {
-                currentVisibleChild.isHiding = false;
-                currentVisibleChild.isVisible = false;
-
-                foundChildrenTransition.isVisible = true;
-
-                setChildrenTransition(() => {
-                  return [...copiedCurrentValues];
-                });
-              }, animationOut.duration);
-
-              timeoutRef.current = timeout;
-            } else {
-              currentVisibleChild.isVisible = false;
+        if (setChildren) {
+          if (isClicked === false) {
+            setIsClicked(true);
+            if (onClick) {
+              setTimeout(() => {
+                onClick(event);
+              });
             }
           }
-
-          foundChildrenTransition.animationIn = animationIn;
-
-          foundChildrenTransition.isVisible = true;
-
-          return copiedCurrentValues;
-        });
-        onClick && onClick(event);
+        }
       }}>
       {children}
     </button>
@@ -100,184 +143,81 @@ const TransitionButton = ({
 
 export { TransitionButton };
 
-const TransitionChild = ({
-  children,
-  childData,
-  zIndexCounter,
-  setZIndexcounter,
-}: {
-  children: ReactElement;
-  childData: transitionChildType;
-  zIndexCounter: number;
-  setZIndexcounter: Dispatch<SetStateAction<number>>;
-}) => {
-  useEffect(() => {
-    const parentElement = document.querySelector(`.${childData.parentElementClassName}`);
-
-    const childElement = parentElement?.querySelector(`.${childData.className}`) as HTMLElement;
-
-    if (childElement) {
-      childElement.style.zIndex = `${zIndexCounter}`;
-
-      if (childElement && childData.animationIn && !childElement.className.includes(childData.animationIn.className)) {
-        childElement.classList.add(childData.animationIn.className);
-      }
-    }
-
-    setZIndexcounter((currentValue) => currentValue + 1);
-  }, []);
-
-  useEffect(() => {
-    const parentElement = document.querySelector(`.${childData.parentElementClassName}`);
-
-    const childElement = parentElement?.querySelector(`.${childData.className}`) as HTMLElement;
-
-    if (childElement && childData.animationOut && childData.isHiding && !childElement.className.includes(childData.animationOut.className)) {
-      childElement.classList.add(childData.animationOut.className);
-    }
-  }, [childData.isHiding]);
-
-  return children;
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const TransitionChildStatic = ({ children, renderToRef }: { children: ReactElement; renderToRef: object }) => {
-  return children;
-};
-
-export { TransitionChildStatic };
-
-const ComponentsTransition = ({
-  children,
-  firstVisible = null,
-  parentElementRef,
-}: {
+interface ComponentsTransitionProps {
   children: ReactNode[];
   firstVisible?: null | string;
-  parentElementRef: { current: HTMLElement | null };
-}) => {
-  const [childrenTransition, setChildrenTransition] = useState<transitionChildType[]>([]);
-  const [zIndexCounter, setZIndexcounter] = useState(1);
+  getContext?: (...args: any) => void;
+}
 
-  useLayoutEffect(() => {
-    setChildrenTransition((currentValues) => {
-      const copiedCurrentValues = [...currentValues];
+const ComponentsTransition = ({ children: childrenBefore, firstVisible, getContext }: ComponentsTransitionProps) => {
+  //const [children, setChildren] = useState<componentsTransitionChildren>(setNewChildren(childrenBefore, firstVisible));
 
-      copiedCurrentValues.forEach((childTransition) => {
-        if (childTransition.key === firstVisible) {
-          childTransition.isVisible = true;
-        } else {
-          childTransition.isVisible = false;
-        }
-      });
-
-      return copiedCurrentValues;
-    });
-  }, [firstVisible]);
-
-  useLayoutEffect(() => {
-    const childrenTransition: transitionChildType[] = [];
-
-    try {
-      let isFirstVisibleChildFound = false;
-
-      children.forEach((child) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  const [children, setChildren] = useState<componentsTransitionChildren>(
+    childrenBefore.map((childComponent, index) => {
+      //@ts-ignore
+      if (childComponent.key === null) {
+        throw new Error(`Some child given in <ComponentsTransition /> has no given key prop. Make sure if every child has it's own key with unique name`);
+      } else {
         //@ts-ignore
-        const { key, props } = child;
+        const childComponentKey = childComponent.key;
+        return {
+          id: crypto.randomUUID(),
+          isVisible: firstVisible ? (firstVisible === childComponentKey ? true : false) : index === 0 ? true : false,
+          key: childComponentKey,
+          domElement: null,
+          unmountTimeoutRef: null,
+        };
+      }
+    })
+  );
 
-        const parsedHTMLChild = new DOMParser().parseFromString(ReactDomServer.renderToStaticMarkup(child as ReactElement), "text/xml");
+  const keyComponentsToDisplay = children.filter((data) => data.isVisible).map((data) => data.key);
 
-        if (parsedHTMLChild.firstChild && parsedHTMLChild.firstChild.nodeName !== "html") {
-          const wrappedChildElement = parsedHTMLChild.firstChild as HTMLDivElement;
-
-          const isVisibleStatus =
-            props.renderToRef !== undefined
-              ? true
-              : firstVisible === key
-              ? true
-              : firstVisible === null
-              ? props.renderToRef === undefined && isFirstVisibleChildFound === false
-                ? true
-                : false
-              : false;
-
-          childrenTransition.push({
-            key: key,
-            isVisible: isVisibleStatus,
-            className: wrappedChildElement.className,
-            animationIn: null,
-            animationOut: null,
-            parentElementClassName: parentElementRef.current?.className,
-            isHiding: false,
-            renderToRef: props.renderToRef ? props.renderToRef : false,
-          });
-
-          if (props.renderToRef === undefined && isFirstVisibleChildFound === false) {
-            isFirstVisibleChildFound = true;
-          }
-        } else {
-          throw {};
-        }
-      });
-
-      setChildrenTransition(childrenTransition);
-    } catch {
-      console.error(
-        "The given child is not valid element. This may happen when '<React.Fragment></React.Fragment>' ('<></>') is used. Every given child must be wrapped into any element"
-      );
-      return;
+  useEffect(() => {
+    if (getContext) {
+      getContext(() => setChildren);
     }
   }, []);
 
-  useLayoutEffect(() => {
-    const childrenTransitionAfter: transitionChildType[] = [];
-
-    if (childrenTransition.length !== 0) {
-      childrenTransition.forEach((childData) => {
-        const { isVisible, key, className, animationIn, animationOut, isHiding, renderToRef } = childData;
-
-        childrenTransitionAfter.push({
-          key: key,
-          isVisible: isVisible,
-          className: className,
-          animationIn: animationIn,
-          animationOut: animationOut,
-          parentElementClassName: parentElementRef.current?.className,
-          isHiding: isHiding,
-          renderToRef: renderToRef,
-        });
-      });
-
-      setChildrenTransition(childrenTransitionAfter);
-    }
-  }, [children, parentElementRef.current]);
-
   return (
-    <ComponentsTransitionContext.Provider value={setChildrenTransition}>
-      {childrenTransition.length !== 0 &&
-        childrenTransition.map((childData) => {
-          const { isVisible, key, isHiding, renderToRef } = childData;
+    <ComponentsTransitionSetChildrenContext.Provider value={setChildren}>
+      {/* {componentsToDisplay.map((data) => {
+        return data.component;
+      })} */}
+      {childrenBefore.map((child) => {
+        //@ts-ignore
+        const componentKey = child.key;
 
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          //@ts-ignore
-          const foundChild = children.find((child) => child.key === key);
-
-          const clonedElement = cloneElement(foundChild as ReactElement);
-
-          if (renderToRef) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        if (keyComponentsToDisplay.includes(componentKey)) {
+          return cloneElement(
             //@ts-ignore
-            return createPortal(foundChild, renderToRef.current);
-          } else if (isVisible || isHiding) {
-            return (
-              <TransitionChild key={key} childData={childData} zIndexCounter={zIndexCounter} setZIndexcounter={setZIndexcounter}>
-                {clonedElement}
-              </TransitionChild>
-            );
-          }
-        })}
-    </ComponentsTransitionContext.Provider>
+            child.type({ ...child.props }),
+            {
+              key: componentKey,
+              ref: (element: HTMLElement) => {
+                if (element) {
+                  const foundChild = children.find((data) => data.key === componentKey)!;
+
+                  if (foundChild.domElement === null) {
+                    setChildren((currentValue) => {
+                      const copiedCurrentValue = [...currentValue];
+
+                      const foundChild = copiedCurrentValue.find((data) => data.key === componentKey)!;
+
+                      foundChild.domElement = element;
+
+                      return copiedCurrentValue;
+                    });
+                  }
+
+                  return element;
+                }
+              },
+            }
+          );
+        }
+      })}
+    </ComponentsTransitionSetChildrenContext.Provider>
   );
 };
 
